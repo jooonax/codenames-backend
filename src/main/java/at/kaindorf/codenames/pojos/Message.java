@@ -1,4 +1,4 @@
-package at.kaindorf.codenames.model;
+package at.kaindorf.codenames.pojos;
 
 import lombok.*;
 

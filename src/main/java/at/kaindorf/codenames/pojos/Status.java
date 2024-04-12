@@ -1,4 +1,4 @@
-package at.kaindorf.codenames.model;
+package at.kaindorf.codenames.pojos;
 
 /**
  * Project: codenames-backend
