@@ -1,6 +1,7 @@
 package at.kaindorf.codenames.pojos;
 
 import lombok.Data;
+import org.apache.catalina.User;
 
 import java.util.List;
 
@@ -14,4 +15,5 @@ import java.util.List;
 public class GameState {
     private List<Card> cards;
     private List<Team> teams;
+    private List<String> receiverNames;
 }
