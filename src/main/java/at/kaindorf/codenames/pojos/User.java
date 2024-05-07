@@ -14,8 +14,7 @@ import java.util.List;
 @Data
 public class User {
 
-    private String userName;
+    private String user;
     private String roomCode;
-    private List<String> receiverNames;
 
 }
