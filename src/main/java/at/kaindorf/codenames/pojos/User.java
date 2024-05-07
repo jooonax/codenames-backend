@@ -12,7 +12,7 @@ import java.util.List;
  */
 
 @Data
-public class UserJoin {
+public class User {
 
     private String userName;
     private String roomCode;

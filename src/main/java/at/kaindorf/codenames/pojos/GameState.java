@@ -1,7 +1,7 @@
 package at.kaindorf.codenames.pojos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.apache.catalina.User;
 
 import java.util.List;
 
@@ -12,8 +12,11 @@ import java.util.List;
  * Time: 16:57:38
  */
 @Data
+@AllArgsConstructor
 public class GameState {
     private List<Card> cards;
     private List<Team> teams;
-    private List<String> receiverNames;
+    private User sender;
+    private String roomCode;
+    private List<Message> gameMessages;
 }
