@@ -2,8 +2,6 @@ package at.kaindorf.codenames.pojos;
 
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * Project: codenames-backend
  * Created by: raph
@@ -12,9 +10,10 @@ import java.util.List;
  */
 
 @Data
-public class User {
-
-    private String user;
+public class Player {
+    private String username;
     private String roomCode;
 
+    private Team team;
+    private Role role;
 }

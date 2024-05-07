@@ -1,11 +1,10 @@
 package at.kaindorf.codenames.controller;
 
 import at.kaindorf.codenames.pojos.GameState;
-import at.kaindorf.codenames.pojos.User;
+import at.kaindorf.codenames.pojos.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -24,23 +23,23 @@ public class GameController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    public static List<User> users = new ArrayList<>();
+    public static List<Player> players = new ArrayList<>();
 
     @MessageMapping("/game")
     public GameState recMessage(@Payload GameState gameState){
-        List<User> usersInRoom = users.stream().filter(u -> u.getRoomCode().equals(gameState.getRoomCode()) && !(u.getUser().equals(gameState.getSender()))).toList();
+        List<Player> usersInRoom = players.stream().filter(u -> u.getRoomCode().equals(gameState.getSender().getRoomCode()) && !(u.getUsername().equals(gameState.getSender().getUsername()))).toList();
 
-        for (User receiverName: usersInRoom) {
-            simpMessagingTemplate.convertAndSendToUser(receiverName.getUser(),"/state", gameState);
+        for (Player receiverName: usersInRoom) {
+            simpMessagingTemplate.convertAndSendToUser(receiverName.getUsername(),"/state", gameState);
         }
 
         return gameState;
     }
 
     @MessageMapping("/join")
-    public User join(@Payload User userJoin) {
-        users.add(userJoin);
-        return userJoin;
+    public Player join(@Payload Player playerJoin) {
+        players.add(playerJoin);
+        return playerJoin;
     }
 
 }
