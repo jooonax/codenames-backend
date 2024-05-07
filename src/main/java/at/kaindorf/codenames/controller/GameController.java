@@ -28,11 +28,10 @@ public class GameController {
 
     @MessageMapping("/game")
     public GameState recMessage(@Payload GameState gameState){
-
-        List<User> usersInRoom = users.stream().filter(u -> u.getRoomCode().equals(gameState.getSender().getRoomCode()) && !(u.getUserName().equals(gameState.getSender().getUserName()))).toList();
+        List<User> usersInRoom = users.stream().filter(u -> u.getRoomCode().equals(gameState.getRoomCode()) && !(u.getUser().equals(gameState.getSender()))).toList();
 
         for (User receiverName: usersInRoom) {
-            simpMessagingTemplate.convertAndSendToUser(receiverName.getUserName(),"/state", gameState);
+            simpMessagingTemplate.convertAndSendToUser(receiverName.getUser(),"/state", gameState);
         }
 
         return gameState;

@@ -16,7 +16,7 @@ import java.util.List;
 public class GameState {
     private List<Card> cards;
     private List<Team> teams;
-    private User sender;
+    private String sender;
     private String roomCode;
     private List<Message> gameMessages;
 }
