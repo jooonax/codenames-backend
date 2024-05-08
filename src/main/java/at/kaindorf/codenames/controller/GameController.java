@@ -1,7 +1,9 @@
 package at.kaindorf.codenames.controller;
 
 import at.kaindorf.codenames.pojos.GameState;
+import at.kaindorf.codenames.pojos.Message;
 import at.kaindorf.codenames.pojos.Player;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -34,6 +36,20 @@ public class GameController {
         }
 
         return gameState;
+    }
+
+    @MessageMapping("/message")
+    public Message recMessage(@Payload Message message) {
+
+        Player sender = players.stream().filter(u -> u.getUsername().equals(message.getSender().getUsername())).findAny().get();
+
+        List<Player> usersInRoom = players.stream().filter(u -> u.getRoomCode().equals(sender.getRoomCode()) && !(u.getUsername().equals(sender.getUsername()))).toList();
+
+        for (Player receiverName: usersInRoom) {
+            simpMessagingTemplate.convertAndSendToUser(receiverName.getUsername(),"/message", message);
+        }
+
+        return message;
     }
 
     @MessageMapping("/join")
