@@ -15,6 +15,5 @@ import java.util.List;
 @AllArgsConstructor
 public class GameState {
     private List<Card> cards;
-    private List<Player> players;
     private Player sender;
 }
