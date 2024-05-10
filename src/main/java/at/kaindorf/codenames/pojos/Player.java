@@ -1,5 +1,6 @@
 package at.kaindorf.codenames.pojos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -10,10 +11,18 @@ import lombok.Data;
  */
 
 @Data
+@AllArgsConstructor
 public class Player {
     private String username;
     private String roomCode;
 
     private Team team;
     private Role role;
+
+    public Player(String roomCode) {
+        username = "bk";
+        this.roomCode = roomCode;
+        team = Team.NONE;
+        role = Role.NONE;
+    }
 }

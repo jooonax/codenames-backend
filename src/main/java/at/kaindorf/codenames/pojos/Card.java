@@ -1,5 +1,6 @@
 package at.kaindorf.codenames.pojos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -9,6 +10,7 @@ import lombok.Data;
  * Time: 16:55:54
  */
 @Data
+@AllArgsConstructor
 public class Card {
     private String word;
     private CardColor color;

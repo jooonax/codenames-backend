@@ -1,8 +1,7 @@
 package at.kaindorf.codenames.controller;
 
-import at.kaindorf.codenames.pojos.GameState;
-import at.kaindorf.codenames.pojos.Message;
-import at.kaindorf.codenames.pojos.Player;
+import at.kaindorf.codenames.io.WordReader;
+import at.kaindorf.codenames.pojos.*;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +14,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Project: codenames-backend
@@ -37,8 +35,10 @@ public class GameController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    public static Map<String, GameState> gameStateMap = new HashMap<>();
-    public static Map<String, List<Player>> playersMap = new HashMap<>();
+    private static final Map<String, GameState> gameStateMap = new HashMap<>();
+    private static final Map<String, List<Player>> playersMap = new HashMap<>();
+    private static final List<String> words = WordReader.readWords();
+    private static final Random RANDOM = new Random();
 
     @MessageMapping("/game")
     public GameState recMessage(@Payload GameState gameState){
@@ -84,6 +84,16 @@ public class GameController {
             playersMap.get(playerJoin.getRoomCode()).add(playerJoin);
 
         } else {
+            GameState gameState = new GameState(new ArrayList<>(), new Player(playerJoin.getRoomCode()));
+            for (int i = 0; i < 25; i++) {
+                int rnd = RANDOM.nextInt(words.size());
+                CardColor color = CardColor.WHITE;
+                if (i < 9) color = CardColor.BLUE;
+                if (i >= 9 && i < 8+9) color = CardColor.RED;
+                if (i == 24) color = CardColor.BLACK;
+                gameState.getCards().add(new Card(words.get(rnd), color));
+            }
+            gameStateMap.put(gameState.getSender().getRoomCode(), gameState);
             playersMap.put(playerJoin.getRoomCode(), new ArrayList<>(List.of(playerJoin)));
         }
         return playerJoin;
@@ -92,5 +102,8 @@ public class GameController {
     public ResponseEntity<List<Player>> getPlayers(@PathVariable String roomCode) {
         return ResponseEntity.ok(playersMap.get(roomCode));
     }
-
+    @GetMapping("/{roomCode}/gameState")
+    public ResponseEntity<GameState> getGameState(@PathVariable String roomCode) {
+        return ResponseEntity.ok(gameStateMap.get(roomCode));
+    }
 }
