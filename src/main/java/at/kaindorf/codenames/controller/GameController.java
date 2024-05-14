@@ -41,7 +41,7 @@ public class GameController {
     private static final Random RANDOM = new Random();
 
     @MessageMapping("/game")
-    public GameState recMessage(@Payload GameState gameState){
+    public GameState recGameState(@Payload GameState gameState){
         if (gameStateMap.containsKey(gameState.getSender().getRoomCode())) {
             gameStateMap.replace(gameState.getSender().getRoomCode(), gameState);
         } else {
@@ -52,6 +52,7 @@ public class GameController {
 
         return gameState;
     }
+
     private void sendGameState(GameState gameState) {
         List<Player> usersInRoom = playersMap.get(gameState.getSender().getRoomCode());
 
@@ -92,9 +93,10 @@ public class GameController {
         }
         return playerJoin;
     }
-    @MessageMapping("/start")
-    public GameState startGame(@Payload Player player) {
-        GameState gameState = new GameState(new ArrayList<>(), new Player(player.getRoomCode()));
+    @MessageMapping("/startGame")
+    public String startGame(@Payload String roomCode) {
+        log.info("Started");
+        GameState gameState = new GameState(new ArrayList<>(), new Player(roomCode));
         for (int i = 0; i < 25; i++) {
             int rnd = RANDOM.nextInt(words.size());
             CardColor color = CardColor.WHITE;
@@ -105,7 +107,7 @@ public class GameController {
         }
         gameStateMap.put(gameState.getSender().getRoomCode(), gameState);
         sendGameState(gameState);
-        return gameState;
+        return roomCode;
     }
 
     @GetMapping("/{roomCode}/players")
