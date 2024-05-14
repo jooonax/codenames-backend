@@ -48,6 +48,11 @@ public class GameController {
             gameStateMap.put(gameState.getSender().getRoomCode(), gameState);
         }
 
+        sendGameState(gameState);
+
+        return gameState;
+    }
+    private void sendGameState(GameState gameState) {
         List<Player> usersInRoom = playersMap.get(gameState.getSender().getRoomCode());
 
         for (Player receiver: usersInRoom) {
@@ -55,8 +60,6 @@ public class GameController {
                 simpMessagingTemplate.convertAndSendToUser(receiver.getUsername(), "/state", gameState);
             }
         }
-
-        return gameState;
     }
 
     @MessageMapping("/message")
@@ -84,20 +87,27 @@ public class GameController {
             playersMap.get(playerJoin.getRoomCode()).add(playerJoin);
 
         } else {
-            GameState gameState = new GameState(new ArrayList<>(), new Player(playerJoin.getRoomCode()));
-            for (int i = 0; i < 25; i++) {
-                int rnd = RANDOM.nextInt(words.size());
-                CardColor color = CardColor.WHITE;
-                if (i < 9) color = CardColor.BLUE;
-                if (i >= 9 && i < 8+9) color = CardColor.RED;
-                if (i == 24) color = CardColor.BLACK;
-                gameState.getCards().add(new Card(words.get(rnd), color));
-            }
-            gameStateMap.put(gameState.getSender().getRoomCode(), gameState);
+
             playersMap.put(playerJoin.getRoomCode(), new ArrayList<>(List.of(playerJoin)));
         }
         return playerJoin;
     }
+    @MessageMapping("/start")
+    public GameState startGame(@Payload Player player) {
+        GameState gameState = new GameState(new ArrayList<>(), new Player(player.getRoomCode()));
+        for (int i = 0; i < 25; i++) {
+            int rnd = RANDOM.nextInt(words.size());
+            CardColor color = CardColor.WHITE;
+            if (i < 9) color = CardColor.BLUE;
+            if (i >= 9 && i < 8+9) color = CardColor.RED;
+            if (i == 24) color = CardColor.BLACK;
+            gameState.getCards().add(new Card(words.get(rnd), color));
+        }
+        gameStateMap.put(gameState.getSender().getRoomCode(), gameState);
+        sendGameState(gameState);
+        return gameState;
+    }
+
     @GetMapping("/{roomCode}/players")
     public ResponseEntity<List<Player>> getPlayers(@PathVariable String roomCode) {
         return ResponseEntity.ok(playersMap.get(roomCode));
