@@ -61,6 +61,15 @@ public class GameController {
             }
         }
     }
+    private void sendPlayer(Player player) {
+        List<Player> usersInRoom = playersMap.get(player.getRoomCode());
+
+        for (Player receiver: usersInRoom) {
+            if (!receiver.getUsername().equals(player.getUsername())) {
+                simpMessagingTemplate.convertAndSendToUser(receiver.getUsername(), "/player", player);
+            }
+        }
+    }
 
     @MessageMapping("/message")
     public Message recMessage(@Payload Message message) {
@@ -98,6 +107,7 @@ public class GameController {
                         p.setRole(player.getRole());
                     }
                     p.setTeam(player.getTeam());
+                    sendPlayer(p);
                     break;
                 }
             }
@@ -110,24 +120,16 @@ public class GameController {
     @MessageMapping("/join")
     public Player join(@Payload Player playerJoin) {
         if (playersMap.containsKey(playerJoin.getRoomCode())) {
-
-            List<Player> usersInRoom = playersMap.get(playerJoin.getRoomCode());
-            for (Player receiver: usersInRoom) {
-                if (!receiver.getUsername().equals(playerJoin.getUsername())) {
-                    simpMessagingTemplate.convertAndSendToUser(receiver.getUsername(),"/joined", playerJoin);
-                }
-            }
+            sendPlayer(playerJoin);
             playersMap.get(playerJoin.getRoomCode()).add(playerJoin);
-
         } else {
-
             playersMap.put(playerJoin.getRoomCode(), new ArrayList<>(List.of(playerJoin)));
         }
         return playerJoin;
     }
+
     @MessageMapping("/start")
     public String startGame(@Payload String roomCode) {
-        log.info("Started");
         GameState gameState = new GameState(new ArrayList<>(), new Player(roomCode));
         for (int i = 0; i < 25; i++) {
             int rnd = RANDOM.nextInt(words.size());
