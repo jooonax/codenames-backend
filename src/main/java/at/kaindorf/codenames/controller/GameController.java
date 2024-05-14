@@ -14,7 +14,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
@@ -70,6 +69,39 @@ public class GameController {
 
         return message;
     }
+
+    @MessageMapping("/role")
+    public Player changeRole(@Payload Player player) {
+
+        List<Player> playersList = playersMap.get(player.getRoomCode()); // get all players from the room of the player object
+
+        if (playersList != null) {
+            for (Player p : playersList) {
+                if (p.getUsername().equals(player.getUsername())) {
+
+                    boolean spymaster = false;
+
+                    for (Player p1 : playersList) { // check if there's already a spymaster on the team
+                        if (p1.getTeam().equals(player.getTeam()) && p1.getRole().equals(Role.MASTER)) {
+                            spymaster = true;
+                            break;
+                        }
+                    }
+
+                    if (!spymaster && player.getRole() != Role.NONE) { // if there is no other spymaster, and the role isn't NONE, it passes
+                        p.setRole(player.getRole());
+                    }
+                    if (player.getTeam() != Team.NONE) {
+                        p.setTeam(player.getTeam());
+                    }
+                    break;
+                }
+            }
+        }
+
+        return player;
+    }
+
 
     @MessageMapping("/join")
     public Player join(@Payload Player playerJoin) {
