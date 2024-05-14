@@ -85,19 +85,19 @@ public class GameController {
 
                     boolean spymaster = false;
 
-                    for (Player p1 : playersList) { // check if there's already a spymaster on the team
-                        if (p1.getTeam().equals(player.getTeam()) && p1.getRole().equals(Role.MASTER)) {
-                            spymaster = true;
-                            break;
+                    if (player.getRole().equals(Role.MASTER)) {
+                        for (Player p1 : playersList) { // check if there's already a spymaster on the team
+                            if (p1.getTeam().equals(player.getTeam()) && p1.getRole().equals(Role.MASTER)) {
+                                spymaster = true;
+                                break;
+                            }
                         }
                     }
 
-                    if (!spymaster && player.getRole() != Role.NONE) { // if there is no other spymaster, and the role isn't NONE, it passes
+                    if (!spymaster) {
                         p.setRole(player.getRole());
                     }
-                    if (player.getTeam() != Team.NONE) {
-                        p.setTeam(player.getTeam());
-                    }
+                    p.setTeam(player.getTeam());
                     break;
                 }
             }
@@ -125,7 +125,7 @@ public class GameController {
         }
         return playerJoin;
     }
-    @MessageMapping("/startGame")
+    @MessageMapping("/start")
     public String startGame(@Payload String roomCode) {
         log.info("Started");
         GameState gameState = new GameState(new ArrayList<>(), new Player(roomCode));
