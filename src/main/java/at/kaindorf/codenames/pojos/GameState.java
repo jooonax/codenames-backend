@@ -2,6 +2,8 @@ package at.kaindorf.codenames.pojos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
@@ -14,6 +16,13 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class GameState {
+    @NonNull
     private List<Card> cards;
+    @NonNull
     private Player sender;
+    @NonNull
+    private Team turn;
+    @NonNull
+    private boolean started;
+    private Clue clue;
 }
