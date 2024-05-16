@@ -13,6 +13,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Player {
+    private int id;
     private String username;
     private String roomCode;
 
@@ -20,6 +21,7 @@ public class Player {
     private Role role;
 
     public Player(String roomCode) {
+        id = -1;
         username = "bk";
         this.roomCode = roomCode;
         team = Team.NONE;

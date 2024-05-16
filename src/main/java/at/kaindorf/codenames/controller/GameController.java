@@ -38,6 +38,7 @@ public class GameController {
     private static final Map<String, List<Player>> playersMap = new HashMap<>();
     private static final List<String> words = WordReader.readWords();
     private static final Random RANDOM = new Random();
+    private static int ID = 0;
 
     @MessageMapping("/game")
     public GameState recGameState(@Payload GameState gameState){
@@ -56,8 +57,8 @@ public class GameController {
         List<Player> usersInRoom = playersMap.get(gameState.getSender().getRoomCode());
 
         for (Player receiver: usersInRoom) {
-            if (!receiver.getUsername().equals(gameState.getSender().getUsername())) {
-                simpMessagingTemplate.convertAndSendToUser(receiver.getUsername(), "/state", gameState);
+            if (receiver.getId() != gameState.getSender().getId()) {
+                simpMessagingTemplate.convertAndSendToUser(Integer.toString(receiver.getId()), "/state", gameState);
             }
         }
     }
@@ -65,8 +66,8 @@ public class GameController {
         List<Player> usersInRoom = playersMap.get(player.getRoomCode());
 
         for (Player receiver: usersInRoom) {
-            if (!receiver.getUsername().equals(player.getUsername())) {
-                simpMessagingTemplate.convertAndSendToUser(receiver.getUsername(), "/player", player);
+            if (receiver.getId() != player.getId()) {
+                simpMessagingTemplate.convertAndSendToUser(Integer.toString(receiver.getId()), "/player", player);
             }
         }
     }
@@ -75,8 +76,8 @@ public class GameController {
     public Message recMessage(@Payload Message message) {
         List<Player> usersInRoom = playersMap.get(message.getSender().getRoomCode());
         for (Player receiver: usersInRoom) {
-            if (!receiver.getUsername().equals(message.getSender().getUsername())) {
-                simpMessagingTemplate.convertAndSendToUser(receiver.getUsername(),"/message", message);
+            if (receiver.getId() != message.getSender().getId()) {
+                simpMessagingTemplate.convertAndSendToUser(Integer.toString(receiver.getId()),"/message", message);
             }
         }
 
@@ -90,7 +91,7 @@ public class GameController {
 
         if (playersList != null) {
             for (Player p : playersList) {
-                if (p.getUsername().equals(player.getUsername())) {
+                if (p.getId() == player.getId()) {
 
                     boolean spymaster = false;
 
@@ -120,8 +121,18 @@ public class GameController {
     @MessageMapping("/join")
     public Player join(@Payload Player playerJoin) {
         if (playersMap.containsKey(playerJoin.getRoomCode())) {
-            sendPlayer(playerJoin);
-            playersMap.get(playerJoin.getRoomCode()).add(playerJoin);
+
+            int id = playerJoin.getId();
+            Optional<Player> optionalRejoinPlayer = playersMap.get(playerJoin.getRoomCode())
+                    .stream()
+                    .filter(p -> p.getId() == id).findFirst();
+
+            if (optionalRejoinPlayer.isPresent()) {
+                playerJoin = optionalRejoinPlayer.get();
+            } else {
+                sendPlayer(playerJoin);
+                playersMap.get(playerJoin.getRoomCode()).add(playerJoin);
+            }
         } else {
             playersMap.put(playerJoin.getRoomCode(), new ArrayList<>(List.of(playerJoin)));
         }
@@ -152,5 +163,10 @@ public class GameController {
     @GetMapping("/{roomCode}/gameState")
     public ResponseEntity<GameState> getGameState(@PathVariable String roomCode) {
         return ResponseEntity.ok(gameStateMap.get(roomCode));
+    }
+
+    @GetMapping("/id")
+    public ResponseEntity<Integer> getId() {
+        return ResponseEntity.ok(ID++);
     }
 }
