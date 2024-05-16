@@ -150,6 +150,7 @@ public class GameController {
             if (i >= 9 && i < 8+9) color = startTeam.equals(Team.BLUE) ? CardColor.RED : CardColor.BLUE;
             if (i == 24) color = CardColor.BLACK;
             gameState.getCards().add(new Card(words.get(rnd), color, false, new String[0]));
+            Collections.shuffle(gameState.getCards());
         }
         gameStateMap.put(gameState.getSender().getRoomCode(), gameState);
         sendGameState(gameState);
