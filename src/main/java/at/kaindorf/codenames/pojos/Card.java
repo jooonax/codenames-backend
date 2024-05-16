@@ -14,4 +14,6 @@ import lombok.Data;
 public class Card {
     private String word;
     private CardColor color;
+    private boolean flipped;
+    private String[] marked;
 }
