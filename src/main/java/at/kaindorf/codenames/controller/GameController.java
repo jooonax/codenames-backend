@@ -108,6 +108,7 @@ public class GameController {
                         p.setRole(player.getRole());
                         p.setTeam(player.getTeam());
                     }
+                    p.setUsername(player.getUsername());
                     sendPlayer(p);
                     break;
                 }
@@ -142,14 +143,20 @@ public class GameController {
     @MessageMapping("/start")
     public String startGame(@Payload String roomCode) {
         Team startTeam = RANDOM.nextBoolean() ? Team.BLUE : Team.RED;
+        List<String> chosenWords = new ArrayList<>();
         GameState gameState = new GameState(new ArrayList<>(), new Player(roomCode), startTeam, true, null, 0, Team.NONE);
         for (int i = 0; i < 25; i++) {
-            int rnd = RANDOM.nextInt(words.size());
+            String word = "";
+            do {
+                int rnd = RANDOM.nextInt(words.size());
+                word = words.get(rnd);
+            } while (chosenWords.contains(word));
+            chosenWords.add(word);
             CardColor color = CardColor.WHITE;
             if (i < 9) color = startTeam.equals(Team.BLUE) ? CardColor.BLUE : CardColor.RED;
             if (i >= 9 && i < 8+9) color = startTeam.equals(Team.BLUE) ? CardColor.RED : CardColor.BLUE;
             if (i == 24) color = CardColor.BLACK;
-            gameState.getCards().add(new Card(words.get(rnd), color, false, new String[0]));
+            gameState.getCards().add(new Card(word, color, false, new String[0]));
             Collections.shuffle(gameState.getCards());
         }
         gameStateMap.put(gameState.getSender().getRoomCode(), gameState);
