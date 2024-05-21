@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.List;
 
@@ -37,11 +38,18 @@ public class GameController {
     private static final Map<String, GameState> gameStateMap = new HashMap<>();
     private static final Map<String, List<Player>> playersMap = new HashMap<>();
     private static final List<String> words = WordReader.readWords();
+    private static final Map<Integer, LocalTime> heartbeatList = new HashMap<>();
     private static final Random RANDOM = new Random();
     private static int ID = 0;
 
+    @MessageMapping("/beat")
+    public Integer heartBeat(@Payload Integer id) {
+        heartbeatList.put(id, LocalTime.now());
+        return id;
+    }
+
     @MessageMapping("/game")
-    public GameState recGameState(@Payload GameState gameState){
+    public GameState recGameState(@Payload GameState gameState) {
         if (gameStateMap.containsKey(gameState.getSender().getRoomCode())) {
             gameStateMap.replace(gameState.getSender().getRoomCode(), gameState);
         } else {
