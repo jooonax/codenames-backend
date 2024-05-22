@@ -11,12 +11,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
 import java.util.*;
 import java.util.List;
+
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 /**
  * Project: codenames-backend
@@ -38,15 +44,10 @@ public class GameController {
     private static final Map<String, GameState> gameStateMap = new HashMap<>();
     private static final Map<String, List<Player>> playersMap = new HashMap<>();
     private static final List<String> words = WordReader.readWords();
-    private static final Map<Integer, LocalTime> heartbeatList = new HashMap<>();
     private static final Random RANDOM = new Random();
     private static int ID = 0;
 
-    @MessageMapping("/beat")
-    public Integer heartBeat(@Payload Integer id) {
-        heartbeatList.put(id, LocalTime.now());
-        return id;
-    }
+
 
     @MessageMapping("/game")
     public GameState recGameState(@Payload GameState gameState) {
@@ -126,7 +127,6 @@ public class GameController {
         return player;
     }
 
-
     @MessageMapping("/join")
     public Player join(@Payload Player playerJoin) {
         if (playersMap.containsKey(playerJoin.getRoomCode())) {
@@ -172,6 +172,13 @@ public class GameController {
         return roomCode;
     }
 
+    @MessageMapping("/disconnect")
+    public Player disconnect(@Payload Player player) {
+        playersMap.get(player.getRoomCode()).remove(player);
+        sendPlayer(player);
+        return player;
+    }
+
     @GetMapping("/{roomCode}/players")
     public ResponseEntity<List<Player>> getPlayers(@PathVariable String roomCode) {
         return ResponseEntity.ok(playersMap.get(roomCode));
@@ -180,7 +187,6 @@ public class GameController {
     public ResponseEntity<GameState> getGameState(@PathVariable String roomCode) {
         return ResponseEntity.ok(gameStateMap.get(roomCode));
     }
-
     @GetMapping("/id")
     public ResponseEntity<Integer> getId() {
         return ResponseEntity.ok(ID++);

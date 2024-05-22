@@ -2,6 +2,7 @@ package at.kaindorf.codenames.pojos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Project: codenames-backend
@@ -12,7 +13,9 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Player {
+    @EqualsAndHashCode.Include
     private int id;
     private String username;
     private String roomCode;
