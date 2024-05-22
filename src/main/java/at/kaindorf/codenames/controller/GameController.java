@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -84,13 +85,33 @@ public class GameController {
     @MessageMapping("/message")
     public Message recMessage(@Payload Message message) {
         List<Player> usersInRoom = playersMap.get(message.getSender().getRoomCode());
-        for (Player receiver: usersInRoom) {
-            if (receiver.getId() != message.getSender().getId()) {
-                simpMessagingTemplate.convertAndSendToUser(Integer.toString(receiver.getId()),"/message", message);
-            }
+        List<Player> receivers = new ArrayList<>(usersInRoom);
+
+        System.out.println("receivers: " + message.getReceivers());
+
+        List<String> parameters = Arrays.stream(message.getReceivers().split(",")).map(String::trim).toList();
+
+        if (!parameters.isEmpty()) {
+            receivers.clear();
+            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "red_spymaster", Role.MASTER, Team.RED);
+            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "red_operative", Role.OPERATOR, Team.RED);
+            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "blue_spymaster", Role.MASTER, Team.BLUE);
+            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "blue_operative", Role.OPERATOR, Team.BLUE);
         }
 
+        receivers.stream()
+                .filter(receiver -> receiver.getId() != message.getSender().getId())
+                .forEach(receiver -> simpMessagingTemplate.convertAndSendToUser(Integer.toString(receiver.getId()), "/message", message));
+
         return message;
+    }
+
+    private void addReceiversByRoleAndTeam(List<String> parameters, List<Player> receivers, List<Player> usersInRoom, String roleParam, Role role, Team team) {
+        if (parameters.contains(roleParam)) {
+            receivers.addAll(usersInRoom.stream()
+                    .filter(user -> user.getRole().equals(role) && user.getTeam().equals(team))
+                    .toList());
+        }
     }
 
     @MessageMapping("/role")
