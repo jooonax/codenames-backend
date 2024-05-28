@@ -25,6 +25,7 @@ public class GameState {
     @NonNull
     private boolean started;
     private Clue clue;
+    private String intercept;
     private int flippedCount;
     private Team winner;
 }
