@@ -164,7 +164,7 @@ public class GameController {
     public String startGame(@Payload String roomCode) {
         Team startTeam = RANDOM.nextBoolean() ? Team.BLUE : Team.RED;
         List<String> chosenWords = new ArrayList<>();
-        GameState gameState = new GameState(new ArrayList<>(), new Player(roomCode), startTeam, true, null, 0, Team.NONE);
+        GameState gameState = new GameState(new ArrayList<>(), new Player(roomCode), startTeam, true, null, null, 0, Team.NONE);
         for (int i = 0; i < 25; i++) {
             String word = "";
             do {

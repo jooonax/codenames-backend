@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,4 +29,7 @@ public class GameState {
     private Clue intercept;
     private int flippedCount;
     private Team winner;
+
+    public GameState(ArrayList<Object> objects, Player sender, Team startTeam, boolean started, Object clue, int i, Team team) {
+    }
 }
