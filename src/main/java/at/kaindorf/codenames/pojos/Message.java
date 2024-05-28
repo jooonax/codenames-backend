@@ -19,5 +19,5 @@ public class Message {
     private Player sender;
     private String message;
     private String date;
-    private String receivers;
+    private Player target;
 }

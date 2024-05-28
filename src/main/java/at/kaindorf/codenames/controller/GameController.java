@@ -2,28 +2,19 @@ package at.kaindorf.codenames.controller;
 
 import at.kaindorf.codenames.io.WordReader;
 import at.kaindorf.codenames.pojos.*;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalTime;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.time.temporal.ChronoUnit.MINUTES;
-import static java.time.temporal.ChronoUnit.SECONDS;
 
 /**
  * Project: codenames-backend
@@ -87,16 +78,16 @@ public class GameController {
         List<Player> usersInRoom = playersMap.get(message.getSender().getRoomCode());
         List<Player> receivers = new ArrayList<>(usersInRoom);
 
-        System.out.println("receivers: " + message.getReceivers());
+        Player player = message.getTarget(); // get the player object from the message object
 
-        List<String> parameters = Arrays.stream(message.getReceivers().split(",")).map(String::trim).toList();
-
-        if (!parameters.isEmpty()) {
-            receivers.clear();
-            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "red_spymaster", Role.MASTER, Team.RED);
-            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "red_operative", Role.OPERATOR, Team.RED);
-            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "blue_spymaster", Role.MASTER, Team.BLUE);
-            addReceiversByRoleAndTeam(parameters, receivers, usersInRoom, "blue_operative", Role.OPERATOR, Team.BLUE);
+        if (!(player.getUsername().isBlank())) { // if the username is not null, it filters out the user with the specified username
+            receivers = receivers.stream().filter(p -> p.getUsername().equals(player.getUsername())).toList();
+        }
+        if (!(player.getTeam().equals(Team.NONE))) { // if the team is defined, it sends the message only to users of that team
+            receivers = receivers.stream().filter(p -> p.getTeam().equals(player.getTeam())).toList();
+        }
+        if (!(player.getRole().equals(Role.NONE))) { // if the role is defined, it sends the message only to users with that role
+            receivers = receivers.stream().filter(p -> p.getRole().equals(player.getRole())).toList();
         }
 
         receivers.stream()
