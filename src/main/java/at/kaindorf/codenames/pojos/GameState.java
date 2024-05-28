@@ -30,6 +30,4 @@ public class GameState {
     private int flippedCount;
     private Team winner;
 
-    public GameState(ArrayList<Object> objects, Player sender, Team startTeam, boolean started, Object clue, int i, Team team) {
-    }
 }
